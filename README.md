@@ -11,7 +11,7 @@ C++ Inter-Process Communication Library
 
 ```sh
 $ mkdir build && cd build
-$ conan install ..
+$ conan install .. -s build_type=Debug
 $ cmake ..
-$ cmake --build . --config Release
+$ cmake --build . --config Debug
 ```
