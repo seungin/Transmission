@@ -1,33 +1,10 @@
 #pragma once
 
+#include <cstdint>
 #include <memory>
 #include <string>
 
-#include <boost/interprocess/managed_shared_memory.hpp>
-
-using ManagedSharedMemory = boost::interprocess::managed_shared_memory;
-
-class SharedMemory
-{
-	enum class eModeOption
-	{
-		CREATE = 0,
-		OPEN = 1,
-	};
-
-public:
-	SharedMemory(const std::string& name);
-	SharedMemory(const std::string& name, std::size_t bufferSize);
-	~SharedMemory();
-
-public:
-	std::shared_ptr<ManagedSharedMemory> Ptr();
-
-private:
-	std::string mName;
-	eModeOption mModeOption;
-	std::shared_ptr<ManagedSharedMemory> mManagedSharedMemoryPtr;
-};
+class MessageQueue;
 
 class Port
 {
@@ -37,9 +14,9 @@ public:
 	~Port();
 
 public:
-	void Send();
-	void Receive();
+	int32_t Send();
+	int32_t Receive();
 
 private:
-	SharedMemory mSharedMemory;
+	std::shared_ptr<MessageQueue> mMessageQueue;
 };

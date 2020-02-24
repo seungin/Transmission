@@ -1,47 +1,15 @@
 #include <iostream>
 
 #include "Port.hpp"
-
-SharedMemory::SharedMemory(const std::string& name)
-	: mName(name)
-	, mModeOption(eModeOption::OPEN)
-	, mManagedSharedMemoryPtr()
-{
-	mManagedSharedMemoryPtr = std::make_shared<ManagedSharedMemory>
-		(boost::interprocess::open_only, name.c_str());
-}
-
-SharedMemory::SharedMemory(const std::string& name, std::size_t bufferSize)
-	: mName(name)
-	, mModeOption(eModeOption::CREATE)
-	, mManagedSharedMemoryPtr()
-{
-	boost::interprocess::shared_memory_object::remove(mName.c_str());
-
-	mManagedSharedMemoryPtr = std::make_shared<ManagedSharedMemory>
-		(boost::interprocess::create_only, name.c_str(), bufferSize);
-}
-
-SharedMemory::~SharedMemory()
-{
-	if (mModeOption == eModeOption::CREATE)
-	{
-		boost::interprocess::shared_memory_object::remove(mName.c_str());
-	}
-}
-
-std::shared_ptr<ManagedSharedMemory> SharedMemory::Ptr()
-{
-	return mManagedSharedMemoryPtr;
-}
+#include "MessageQueue.hpp"
 
 Port::Port(const std::string& name)
-	: mSharedMemory(name)
+	: mMessageQueue(std::make_shared<MessageQueue>(name))
 {
 }
 
 Port::Port(const std::string& name, std::size_t bufferSize)
-	: mSharedMemory(name, bufferSize)
+	: mMessageQueue(std::make_shared<MessageQueue>(name, bufferSize))
 {
 }
 
@@ -49,19 +17,18 @@ Port::~Port()
 {
 }
 
-void Port::Send()
+int32_t Port::Send()
 {
-	int* writtenDataPtr = mSharedMemory.Ptr()->construct<int>("Integer")(20200216);
-	std::cout << "writtenData: " << *writtenDataPtr << '\n';
+	std::string message = "Hello";
+	int32_t bytesWritten = mMessageQueue->Send(message.data(), message.length() + 1);
+	std::cout << "bytesWritten: " << bytesWritten << '\n';
+	return bytesWritten;
 }
 
-void Port::Receive()
+int32_t Port::Receive()
 {
-	std::pair<int*, std::size_t> foundDataPair = mSharedMemory.Ptr()->find<int>("Integer");
-	int* foundDataPtr = foundDataPair.first;
-
-	if (foundDataPtr)
-	{
-		std::cout << "foundData: " << *foundDataPtr << '\n';
-	}
+	std::vector<char> buffer(1024);
+	int32_t bytesRead = mMessageQueue->Receive(buffer.data(), buffer.size());
+	std::cout << "bytesRead: " << bytesRead << ", bufferData: " << buffer.data() << '\n';
+	return bytesRead;
 }
