@@ -3,7 +3,9 @@ cmake_minimum_required(VERSION 3.8)
 set(target_srcs
   ${CMAKE_CURRENT_LIST_DIR}/main.cpp
   ${CMAKE_CURRENT_LIST_DIR}/MessageQueue.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/NodeHandle.cpp
   ${CMAKE_CURRENT_LIST_DIR}/Port.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/ServiceHandle.cpp
 )
 source_group(TREE ${CMAKE_CURRENT_LIST_DIR} PREFIX "/" FILES ${target_srcs})
 
